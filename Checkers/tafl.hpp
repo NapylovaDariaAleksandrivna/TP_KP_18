@@ -29,7 +29,6 @@ string ansi_cyan = "\u001b[36m";
 string ansi_white = "\u001b[37m";
 string ansi_reset = "\u001b[0m";
 
-//Выделение координат из строки
 vector<string> split_string(const std::string& s, char delim) 
 {
   vector<string> tokens;
@@ -48,19 +47,21 @@ vector<string> split_string(const std::string& s, char delim)
   return tokens;
 }
 
-// Проверяет возможность перемещения фигуры игрока
 bool check_player_moves(Table board, int old_i, int old_j, int new_i, int new_j) 
 {
-  if (new_i > 8 || new_i < 0 || new_j > 8 || new_j < 0) {               // За границы доски
+  if (new_i > 8 || new_i < 0) {
     return false;
   }
-  if (board.at(old_i).at(old_j) == "---") {                             // Попытка хода пустотой
+  if (new_j > 8 || new_j < 0) {
     return false;
   }
-  if (board.at(new_i).at(new_j) != "---") {                             // Попытка хода на незанятую 
+  if (board.at(old_i).at(old_j) == "---") {
     return false;
   }
-  if (board.at(old_i).at(old_j).at(0) == 'c') {                         // Попытка хода чужими
+  if (board.at(new_i).at(new_j) != "---") {
+    return false;
+  }
+  if (board.at(old_i).at(old_j).at(0) == 'c') {
     return false;
   }
   if (board.at(new_i).at(new_j) == "---") {
@@ -68,43 +69,37 @@ bool check_player_moves(Table board, int old_i, int old_j, int new_i, int new_j)
   }
 }
 
-//// Может ли фишка прыгнуть
-//bool check_player_jumps(Table board, int old_i, int old_j, int via_i, int via_j, int new_i, int new_j)
-//{
-//    if (new_i > 8 || new_i < 0 || new_j > 8 || new_j < 0) {             // За границы доски
-//        return false;
-//    }
-//
-//    // Проверяем, что клетка, через которую совершается прыжок, не пуста //!убрать?
-//    if (board.at(via_i).at(via_j) == "---") {                           
-//        return false;
-//    }
-//
-//    // Проверяем, что фигура на клетке, через которую совершается прыжок, не является королем (K) или чёрной фигурой (b)
-//    if (board.at(via_i).at(via_j).at(0) == 'K' ||
-//        board.at(via_i).at(via_j).at(0) == 'b') {
-//        return false;
-//    }
-//
-//    // Проверяем, что клетка, на которую прыгает фигура, пуста
-//    if (board.at(new_i).at(new_j) != "---") {
-//        return false;
-//    }
-//
-//    // Проверяем, что фигура на старых координатах существует
-//    if (board.at(old_i).at(old_j) == "---") {
-//        return false;
-//    }
-//
-//    // Проверяем, является ли фигура на старых координатах "своей" фигурой
-//    if (board.at(old_i).at(old_j).at(0) == 'c') {
-//        return false;
-//    }
-//
-//    // Если все проверки пройдены успешно, возвращаем true, что означает, что прыжок допустим
-//    return true;
-//}
-
+bool check_player_jumps(Table board, int old_i, int old_j, int via_i, int via_j, int new_i, int new_j) 
+{
+  if (new_i > 8 || new_i < 0) {
+    return false;
+  }
+  if (new_j > 8 || new_j < 0) {
+    return false;
+  }
+  if (board.at(via_i).at(via_j) == "---") {
+    return false;
+  }
+  if (board.at(via_i).at(via_j).at(0) == 'K' ||
+      board.at(via_i).at(via_j).at(0) == 'b') {
+    return false;
+  }
+  if (board.at(via_i).at(via_j).at(0) == 'K' ||
+      board.at(via_i).at(via_j).at(0) == 'b') {
+      return false;
+  }
+  if (board.at(new_i).at(new_j) != "---") {
+    return false;
+  }
+  if (board.at(old_i).at(old_j) == "---") {
+    return false;
+  }
+  if (board.at(old_i).at(old_j).at(0) == 'c')
+  {
+    return false;
+  }
+  return true;
+}
 
 void make_a_move(Table* board, int old_i, int old_j, int new_i, int new_j, char big_letter, int queen_row) //ходы
 {
@@ -130,32 +125,32 @@ void make_a_move(Table* board, int old_i, int old_j, int new_i, int new_j, char 
   (*board).at(new_i).at(new_j) = letter + std::to_string(new_i) + std::to_string(new_j);
 }
 
-//bool check_jumps(Table board, int old_i, int old_j, int via_i, int via_j, int new_i, int new_j) 
-//{
-//  if (new_i > 8 || new_i < 0) {
-//    return false;
-//  }
-//  if (new_j > 8 || new_j < 0) {
-//    return false;
-//  }
-//  if (board.at(via_i).at(via_j) == "---") {
-//    return false;
-//  }
-//  if (board.at(via_i).at(via_j).at(0) == 'c') {
-//    return false;
-//  }
-//  if (board.at(new_i).at(new_j) != "---") {
-//    return false;
-//  }
-//  if (board.at(old_i).at(old_j) == "---") {
-//    return false;
-//  }
-//  if (board.at(old_i).at(old_j).at(0) == 'b' ||
-//      board.at(old_i).at(old_j).at(0) == 'K') {
-//    return false;
-//  }
-//  return true;
-//}
+bool check_jumps(Table board, int old_i, int old_j, int via_i, int via_j, int new_i, int new_j) 
+{
+  if (new_i > 8 || new_i < 0) {
+    return false;
+  }
+  if (new_j > 8 || new_j < 0) {
+    return false;
+  }
+  if (board.at(via_i).at(via_j) == "---") {
+    return false;
+  }
+  if (board.at(via_i).at(via_j).at(0) == 'c') {
+    return false;
+  }
+  if (board.at(new_i).at(new_j) != "---") {
+    return false;
+  }
+  if (board.at(old_i).at(old_j) == "---") {
+    return false;
+  }
+  if (board.at(old_i).at(old_j).at(0) == 'b' ||
+      board.at(old_i).at(old_j).at(0) == 'K') {
+    return false;
+  }
+  return true;
+}
 
 bool check_moves(Table board, int old_i, int old_j, int new_i, int new_j) {
   if (new_i > 8 || new_i < 0) {
@@ -179,7 +174,7 @@ bool check_moves(Table board, int old_i, int old_j, int new_i, int new_j) {
   }
 }
 
-vector<vector<int>> find_available_moves(Table board, bool mandatory_jumping) //ходы пк
+vector<vector<int>> find_available_moves(Table board, bool mandatory_jumping) //ходы
 {
   vector<vector<int>> available_moves;
   vector<vector<int>> available_jumps;
@@ -250,14 +245,14 @@ vector<vector<int>> find_available_moves(Table board, bool mandatory_jumping) //
               available_moves.push_back({ m, n, m, n + 7 });
           if(check_moves(board, m, n, m, n + 8))
               available_moves.push_back({ m, n, m, n + 8 });
-          /*if (check_jumps(board, m, n, m - 1, n, m - 2, n))
+          if (check_jumps(board, m, n, m - 1, n, m - 2, n))
               available_jumps.push_back({ m, n, m - 2, n });
           if (check_jumps(board, m, n, m + 1, n, m + 2, n))
               available_jumps.push_back({ m, n, m + 2, n });
           if (check_jumps(board, m, n, m, n + 1, m, n + 2))
               available_jumps.push_back({ m, n, m, n + 2 });
           if (check_jumps(board, m, n, m, n - 1, m, n - 2))
-              available_jumps.push_back({ m, n, m, n - 2 });*/
+              available_jumps.push_back({ m, n, m, n - 2 });
       }
     }
   }
@@ -413,14 +408,14 @@ static vector<vector<int>> find_player_available_moves(Table board, bool mandato
                 available_moves.push_back({ m, n, m, n + 7 });
             if (check_player_moves(board, m, n, m, n + 8))
                 available_moves.push_back({ m, n, m, n + 8 });
-            /*if (check_player_jumps(board, m, n, m - 1, n, m - 2, n))
+            if (check_player_jumps(board, m, n, m - 1, n, m - 2, n))
                 available_jumps.push_back({ m, n, m - 2, n });
             if (check_player_jumps(board, m, n, m + 1, n, m + 2, n))
                 available_jumps.push_back({ m, n, m + 2, n });
             if (check_player_jumps(board, m, n, m, n + 1, m, n + 2))
                 available_jumps.push_back({ m, n, m, n + 2 });
             if (check_player_jumps(board, m, n, m, n - 1, m, n - 2))
-                available_jumps.push_back({ m, n, m, n - 2 });*/
+                available_jumps.push_back({ m, n, m, n - 2 });
         }
         else if (board.at(m).at(n).at(0) == 'K') {
             if (check_player_moves(board, m, n, m - 1, n))
@@ -447,14 +442,14 @@ static vector<vector<int>> find_player_available_moves(Table board, bool mandato
                 available_moves.push_back({ m, n, m, n + 2 });
             if (check_player_moves(board, m, n, m, n + 3))
                 available_moves.push_back({ m, n, m, n + 3 });
-            /*if (check_player_jumps(board, m, n, m - 1, n, m - 2, n))
+            if (check_player_jumps(board, m, n, m - 1, n, m - 2, n))
                 available_jumps.push_back({ m, n, m - 2, n });
             if (check_player_jumps(board, m, n, m + 1, n, m + 2, n))
                 available_jumps.push_back({ m, n, m + 2, n });
             if (check_player_jumps(board, m, n, m, n + 1, m, n + 2))
                 available_jumps.push_back({ m, n, m, n + 2 });
             if (check_player_jumps(board, m, n, m, n - 1, m, n - 2))
-                available_jumps.push_back({ m, n, m, n - 2 });*/
+                available_jumps.push_back({ m, n, m, n - 2 });
       }
     }
   }
@@ -847,7 +842,28 @@ class Checkers {
     cout << "2.Вы можете сдаться в любой момент, для эттого нажмите 's'." << endl;
     cout << endl;
     cout << "Выбрана глубина (уровень сложности): " << depth << endl;
-    
+    while (true) {
+      string answer;
+      cout << "\nОбязательно ли есть фишки?[Y/n]: ";
+      cin >> answer;
+      if (answer == "Y" || answer == "y") {
+        mandatory_jumping = true;
+        break;
+      } else if (answer == "N" || answer == "n") {
+        mandatory_jumping = false;
+        break;
+      } else if (answer == "") {
+        cout << ansi_cyan << "Игра окончена!" << ansi_reset << endl;
+        return;
+      } else if (answer == "s") {
+        cout << ansi_cyan
+             << "Вы сдались до начала игры."
+             << ansi_reset << endl;
+        return;
+      } else {
+        cout << ansi_red << "Неправильный ввод!" << ansi_reset << endl;
+      }
+    }
     while (true) {
       print_matrix();
       if (player_turn == true) {
@@ -855,11 +871,12 @@ class Checkers {
         get_player_input();
       } else {
         cout << ansi_cyan << "Ход компьютера." << ansi_reset << endl;
+        cout << "Думаю..." << endl;
         evaluate_states();
       }
       if (king == 0) {
         print_matrix();
-        cout << ansi_red << "Король умер.\nВы проиграли!" << ansi_reset
+        cout << ansi_red << "У вас не осталось фишек.\nВы проиграли!" << ansi_reset
              << endl;
         return;
       } else if (computer_pieces == 0) {
@@ -867,6 +884,14 @@ class Checkers {
         cout << ansi_green << "У компьютера не осталось фишек.\nВы выиграли!"
              << ansi_reset << endl;
         return;
+      } else if ((computer_pieces - player_pieces) - 8 == 5) {
+        string wish;
+        cout << "У вас на 5 фигур меньше чем у противника "
+                "сдаться?";
+        cin >> wish;
+        if (wish == "" || wish == "да") {
+          return;
+        }
       }
       player_turn = !player_turn;
     }
