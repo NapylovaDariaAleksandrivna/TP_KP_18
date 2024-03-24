@@ -294,69 +294,41 @@ vector<vector<int>> find_available_moves(Table board)
     return available_moves;
 }
 
-int evaluation_function(Table board) //оф
-{
-  int result = 0;
-  int mine = 0;
-  int opp = 0;
-  for (int i = 0; i < 9; i++) {
-    for (int j = 0; j < 9; j++) {
-      if (board.at(i).at(j).at(0) == 'c') {
-        mine += 1;
+void count_checker(Table board, int& chips_computer, int& chips_player, int& king_exit) {
+    // Обновление количества фишек и короля у игрока и компьютера
+    for (int m = 0; m < 9; m++) {
+        for (int n = 0; n < 9; n++) {
+            if (board.at(m).at(n).at(0) == 'c') {
+                chips_computer++;
+            }
+            else if (board.at(m).at(n).at(0) == 'b') {
+                chips_player++;
+            }
+            else if (board.at(m).at(n).at(0) == 'X') {
+                if (m == 0 && n == 0) {
+                    if (!(board[m + 1][n] != "---" && board[m][n + 1] != "---")) { king_exit++; }
+                }
+                else if (m == 9 - 1 && n == 9 - 1) {
+                    if (!(board[m - 1][n] != "---" && board[m][n - 1] != "---")) { king_exit++; }
+                }
+                else if (m == 9 - 1 && n == 0) {
+                    if (!(board[m - 1][n] != "---" && board[m][n + 1] != "---")) { king_exit++; }
+                }
+                else if (m == 0 && n == 9 - 1) {
+                    if (!(board[m + 1][n] != "---" && board[m][n - 1] != "---")) { king_exit++; }
+                }
 
-        if (board.at(i).at(j).at(0) == 'c') {
-          result += 5;
+            };
         }
-        if (i + 1 > 8 || j - 1 < 0 || i - 1 < 0 || j + 1 > 8) {
-          continue;
-        }
-        if ((board.at(i).at(j - 1).at(0) == 'b' ||
-            board.at(i).at(j - 1).at(0) == 'K') &&
-            board.at(i).at(j + 1) == "---")
-        {
-          result -= 3;
-        }
-        if ((board.at(i + 1).at(j).at(0) == 'b' ||
-            board.at(i + 1).at(j).at(0) == 'K') &&
-            board.at(i - 1).at(j) == "---")
-        {
-          result -= 3;
-        }
-        if (board.at(i - 1).at(j ).at(0) == 'K' &&
-            board.at(i + 1).at(j ) == "---") {
-            result -= 3;
-        }
-
-        if (board.at(i ).at(j + 1).at(0) == 'K' &&
-            board.at(i ).at(j - 1) == "---") {
-            result -= 3;
-        }
-        if (i + 2 > 8 || j - 2 < 0) {
-          continue;
-        }
-        if ((board.at(i ).at(j - 1).at(0) == 'K' ||
-            board.at(i ).at(j - 1).at(0) == 'b') &&
-            board.at(i ).at(j - 2) == "---") 
-        {
-            result += 6;
-        }
-        if (i + 2 > 8 || j + 2 > 8) {
-          continue;
-        }
-        if ((board.at(i + 1).at(j ).at(0) == 'K' ||
-            board.at(i + 1).at(j ).at(0) == 'b') &&
-            board.at(i + 2).at(j ) == "---") {
-            result += 6;
-        }
-
-      } else if (board.at(i).at(j).at(0) == 'b' ||
-          board.at(i).at(j).at(0) == 'K') {
-        opp += 1;
-      }
     }
-  }
-  return result + (mine - (opp - 1)) - 8;
 }
+int evaluation_function(Table board)
+{
+    int chips_computer = 0, chips_player = 0, king_exit = 0;
+    count_checker(board, chips_computer, chips_player, king_exit);
+    return (chips_computer - chips_player) - (2 * king_exit);
+}
+
 
 // Поиск доступных ходов игрока
 static vector<vector<int>> find_player_available_moves(Table board)
@@ -783,7 +755,7 @@ public:
             // Оцениваем текущее состояние с использованием алгоритма минимакса
             double value = minimax(child.get_board(), depth, -INT_MAX, INT_MAX, false);
             dict.insert(std::pair<double, Node>(value, child)); // Добавляем оцененное состояние в словарь
-
+            
         }
 
         // Проверяем, получился ли пустой словарь
@@ -817,7 +789,6 @@ public:
         cout << "2.Вы можете сдаться в любой момент, для эттого нажмите 's'." << endl;
         cout << endl;
 
-        //cout << "Выбрана глубина (уровень сложности): " << depth << endl;
 
         while (true) {
             print_matrix();                                                   // Выводит текущее состояние поля
