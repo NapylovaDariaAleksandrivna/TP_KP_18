@@ -99,13 +99,117 @@ bool check_player_moves(Table board, int old_i, int old_j, int new_i, int new_j)
     }
 }
 
-// Ход ПК
-void make_a_move(Table* board, int old_i, int old_j, int new_i, int new_j, char big_letter) // Ходы
+// Генерация хода
+void make_a_move(Table* board, int old_i, int old_j, int new_i, int new_j)
 {
-    char letter = (*board).at(old_i).at(old_j).at(0);       // Получаем тип фишки
+    // Получаем тип фишки
+    char letter = (*board).at(old_i).at(old_j).at(0);
+    // Перемещаем фишку на новую клетку
+    (*board).at(old_i).at(old_j) = "---";
+    (*board).at(new_i).at(new_j) = letter + std::to_string(new_i) + std::to_string(new_j);
 
-    (*board).at(old_i).at(old_j) = "---"; // Освобождаем старую клетку
-    (*board).at(new_i).at(new_j) = letter + std::to_string(new_i) + std::to_string(new_j); // Перемещаем фишку на новую клетку
+    // Проверки для игрока
+    if (letter == 'K' || letter == 'b') {
+        // Проверка слева и справа
+        if (new_j - 1 >= 0 && ((*board)[new_i][new_j - 1][0] == 'c' || (*board)[new_i][new_j - 1][0] == 'X') &&
+            new_j + 1 < 9 && ((*board)[new_i][new_j + 1][0] == 'c' || (*board)[new_i][new_j + 1][0] == 'X')) {
+            (*board).at(new_i).at(new_j) = "---";
+            return;
+        }
+        // Проверка сверху и снизу
+        if (new_i - 1 >= 0 && ((*board)[new_i - 1][new_j][0] == 'c' || (*board)[new_i - 1][new_j][0] == 'X') &&
+            new_i + 1 < 9 && ((*board)[new_i + 1][new_j][0] == 'c' || (*board)[new_i + 1][new_j][0] == 'c')) {
+            (*board).at(new_i).at(new_j) = "---";
+            return;
+        }
+
+        // Проверка слева
+        if (new_j - 1 >= 0 && (*board)[new_i][new_j - 1][0] == 'c') {
+            if (new_j - 2 >= 0 &&  ((*board)[new_i][new_j - 2][0] == 'K' ||
+                                    (*board)[new_i][new_j - 2][0] == 'b' ||
+                                    (*board)[new_i][new_j - 2][0] == 'X')) {
+                (*board)[new_i][new_j - 1]= "---";
+            }
+        }
+        // Проверка справа
+        if (new_j + 1 < 9 && (*board)[new_i][new_j + 1][0] == 'c') {
+            if (new_j + 2 < 9 &&  ((*board)[new_i][new_j + 2][0] == 'K' 
+                                || (*board)[new_i][new_j + 2][0] == 'b' 
+                                || (*board)[new_i][new_j + 2][0] == 'X')) {
+                (*board)[new_i][new_j + 1] = "---";
+            }
+        }
+
+        // Проверка сверху
+        if (new_i - 1 >= 0 && (*board)[new_i - 1][new_j][0] == 'c') {
+            if (new_i - 2 >= 0 && ((*board)[new_i - 2][new_j][0] == 'K' 
+                                || (*board)[new_i - 2][new_j][0] == 'b' 
+                                || (*board)[new_i - 2][new_j][0] == 'X')) {
+                (*board)[new_i-1][new_j] = "---";
+            }
+        }
+
+        // Проверка снизу
+        if (new_i + 1 < 9 && (*board)[new_i + 1][new_j][0] == 'c') {
+            if (new_i + 2 < 9 &&  ((*board)[new_i + 2][new_j][0] == 'K' 
+                                || (*board)[new_i + 2][new_j][0] == 'b' 
+                                || (*board)[new_i + 2][new_j][0] == 'X')) {
+                (*board)[new_i + 1][new_j] = "---";
+            }
+        }
+    }
+
+    // Проверки для компьютера
+    if (letter == 'c') {
+        // Проверка слева и справа
+        if (new_j - 1 >= 0 && ((*board)[new_i][new_j - 1][0] == 'K' 
+                            || (*board)[new_i][new_j - 1][0] == 'b'
+                            || (*board)[new_i][new_j - 1][0] == 'X') &&
+            new_j + 1 < 9 && ((*board)[new_i][new_j + 1][0] == 'K' 
+                           || (*board)[new_i][new_j + 1][0] == 'b'
+                           || (*board)[new_i][new_j + 1][0] == 'X')) {
+            (*board).at(new_i).at(new_j) = "---";
+            return;
+        }
+        // Проверка сверху и снизу
+        if (new_i - 1 >= 0 && ((*board)[new_i - 1][new_j][0] == 'K' 
+                            || (*board)[new_i - 1][new_j][0] == 'b' 
+                            || (*board)[new_i - 1][new_j][0] == 'X') 
+            && new_i + 1 < 9 && ((*board)[new_i + 1][new_j][0] == 'K' 
+                              || (*board)[new_i + 1][new_j][0] == 'b'
+                              || (*board)[new_i + 1][new_j][0] == 'X')) {
+            (*board).at(new_i).at(new_j) = "---";
+            return;
+        }
+
+        // Проверка слева
+        if (new_j - 1 >= 0 && ((*board)[new_i][new_j - 1][0] == 'K' || (*board)[new_i][new_j - 1][0] == 'b')) {
+            if (new_j - 2 >= 0 && ((*board)[new_i][new_j - 2][0] == 'c' || (*board)[new_i][new_j - 2][0] == 'X')) {
+                (*board)[new_i][new_j - 1] = "---";
+            }
+        }
+        // Проверка справа
+        if (new_j + 1 < 9 && ((*board)[new_i][new_j + 1][0] == 'K' || (*board)[new_i][new_j + 1][0] == 'b')) {
+            if (new_j + 2 < 9 && ((*board)[new_i][new_j + 2][0] == 'c' || (*board)[new_i][new_j + 2][0] == 'X')) {
+                (*board)[new_i][new_j + 1] = "---";
+            }
+        }
+
+        // Проверка сверху
+        if (new_i - 1 >= 0 && ((*board)[new_i - 1][new_j][0] == 'K' || (*board)[new_i - 1][new_j][0] == 'b')) {
+            if (new_i - 2 >= 0 && ((*board)[new_i - 2][new_j][0] == 'c' || (*board)[new_i - 2][new_j][0] == 'X')) {
+                (*board)[new_i - 1][new_j] = "---";
+            }
+        }
+
+        // Проверка снизу
+        if (new_i + 1 < 9 && ((*board)[new_i + 1][new_j][0] == 'K' || (*board)[new_i + 1][new_j][0] == 'b')) {
+            if (new_i + 2 < 9 && ((*board)[new_i + 2][new_j][0] == 'c' || (*board)[new_i + 2][new_j][0] == 'X')) {
+                (*board)[new_i + 1][new_j] = "---";
+            }
+        }
+    }
+
 }
 
 
@@ -349,11 +453,11 @@ class Node {
           int new_i = available_moves.at(i).at(2);
           int new_j = available_moves.at(i).at(3);
 
-          Table state(current_state);                                           // Создаем копию текущего состояния
-          make_a_move(&state, old_i, old_j, new_i, new_j, big_letter.at(0));    // Выполняем ход
-          vector<int> new_move = { old_i, old_j, new_i, new_j };                // Создаем вектор с координатами хода
-          Node child(state, new_move, this);                                    // Создаем дочернее состояние с новым игровым полем и ходом
-          children_states.push_back(child);                                     // Добавляем дочернее состояние в вектор
+          Table state(current_state);                                    // Создаем копию текущего состояния
+          make_a_move(&state, old_i, old_j, new_i, new_j);               // Выполняем ход
+          vector<int> new_move = { old_i, old_j, new_i, new_j };         // Создаем вектор с координатами хода
+          Node child(state, new_move, this);                   // Создаем состояние с новым игровым полем и ходом
+          children_states.push_back(child);                              // Добавляем дочернее состояние в вектор
       }
 
       return children_states; // Возвращаем вектор дочерних состояний
@@ -548,7 +652,7 @@ public:
         std::cout << std::endl;
     }
 
-    // Доступные ходы игрока
+    // Ход игрока
     void get_player_input()
     {
         // Находим доступные ходы для игрока на текущем игровом поле. Получен вектор ходов (мтарый 
@@ -583,12 +687,8 @@ public:
             cout << "Выберите фишку которой хотите сходить[i,j]: ";
             cin >> coord1;
 
-            // Обработка ввода сдачи игры
-            if (coord1 == "") {
-                cout << ansi_cyan << "Игра окончена!" << ansi_reset << endl;
-                return;
-            }
-            else if (coord1 == "s") {
+            // Обработка ввода
+            if (coord1 == "s") {
                 cout << ansi_cyan << "Вы сдались." << ansi_reset << endl;
                 return;
             }
@@ -596,12 +696,8 @@ public:
             cout << "Выберите место куда её поставить[i,j]:";
             cin >> coord2;
 
-            // Обработка ввода сдачи игры
-            if (coord2 == "") {
-                cout << ansi_cyan << "Игра окончена!" << ansi_reset << endl;
-                return;
-            }
-            else if (coord2 == "s") {
+            // Обработка ввода
+            if (coord2 == "s") {
                 cout << ansi_cyan << "Вы сдались." << ansi_reset << endl;
                 return;
             }
@@ -629,14 +725,14 @@ public:
 
             vector<int> move = { old_i, old_j, new_i, new_j };
 
-            // Проверка корректности хода
+            // Проверка чдо игрок может сходить по такому вектору move
             if (find(available_moves.begin(), available_moves.end(), move) == available_moves.end()) {
                 cout << ansi_red << "Неправильный ход!" << ansi_reset << endl;
                 continue;
             }
 
             // Выполнение хода игрока
-            make_a_move(&matrix, old_i, old_j, new_i, new_j, 'K');
+            make_a_move(&matrix, old_i, old_j, new_i, new_j);
 
             // Обновление количества фишек и короля у игрока и компьютера
             for (int m = 0; m < 9; m++) {
