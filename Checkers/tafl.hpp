@@ -49,228 +49,141 @@ vector<string> split_string(const std::string& s, char delim)
 }
 
 //Проверка хода игрока
-bool check_player_moves(Table board, int old_i, int old_j, int new_i, int new_j) 
+bool check_player_moves(Table board, int old_i, int old_j, int new_i, int new_j)
 {
-  if (new_i > 8 || new_i < 0) {
-    return false;
-  }
-  if (new_j > 8 || new_j < 0) {
-    return false;
-  }
-  if (board.at(old_i).at(old_j) == "---") {
-    return false;
-  }
-  if (board.at(new_i).at(new_j) != "---") {
-    return false;
-  }
-  if (board.at(old_i).at(old_j).at(0) == 'c') {
-    return false;
-  }
-  if (board.at(new_i).at(new_j) == "---") {
-    return true;
-  }
+    if (new_i > 8 || new_i < 0) {
+        return false;
+    }
+    if (new_j > 8 || new_j < 0) {
+        return false;
+    }
+    if (board.at(old_i).at(old_j) == "---") {
+        return false;
+    }
+    if (board.at(new_i).at(new_j) != "---") {
+        return false;
+    }
+    if (board.at(old_i).at(old_j).at(0) == 'c') {
+        return false;
+    }
+    if (old_i != new_i && old_j == new_j) {
+        if (old_i < new_i) {
+            for (int i = 1; i < new_i - old_i; ++i) {
+                if (board.at(old_i + i).at(new_j) != "---")
+                    return false;
+            }
+        }
+        else {
+            for (int i = 1; i < old_i - new_i; ++i) {
+                if (board.at(old_i - i).at(new_j) != "---")
+                    return false;
+            }
+        }
+    }
+    else if (old_j != new_j && old_i == new_i) {
+        if (old_j < new_j) {
+            for (int i = 1; i < new_j - old_j; ++i) {
+                if (board.at(old_i).at(old_j + i) != "---")
+                    return false;
+            }
+        }
+        else {
+            for (int i = 1; i < old_j - new_j; ++i) {
+                if (board.at(old_i).at(old_j - i) != "---")
+                    return false;
+            }
+        }
+    }
+    if (board.at(new_i).at(new_j) == "---") {
+        return true;
+    }
 }
 
-//Проверка прыжка игрока
-bool check_player_jumps(Table board, int old_i, int old_j, int via_i, int via_j, int new_i, int new_j) 
-{
-  if (new_i > 8 || new_i < 0) {
-    return false;
-  }
-  if (new_j > 8 || new_j < 0) {
-    return false;
-  }
-  if (board.at(via_i).at(via_j) == "---") {
-    return false;
-  }
-  if (board.at(via_i).at(via_j).at(0) == 'K' ||
-      board.at(via_i).at(via_j).at(0) == 'b') {
-    return false;
-  }
-  if (board.at(via_i).at(via_j).at(0) == 'K' ||
-      board.at(via_i).at(via_j).at(0) == 'b') {
-      return false;
-  }
-  if (board.at(new_i).at(new_j) != "---") {
-    return false;
-  }
-  if (board.at(old_i).at(old_j) == "---") {
-    return false;
-  }
-  if (board.at(old_i).at(old_j).at(0) == 'c')
-  {
-    return false;
-  }
-  return true;
-}
 // Ход ПК
-void make_a_move(Table* board, int old_i, int old_j, int new_i, int new_j, char big_letter, int queen_row) //ходы
+void make_a_move(Table* board, int old_i, int old_j, int new_i, int new_j, char big_letter) // Ходы
 {
-  char letter = (*board).at(old_i).at(old_j).at(0);
-  int i_difference = old_i - new_i;
-  int j_difference = old_j - new_j;
+    char letter = (*board).at(old_i).at(old_j).at(0);       // Получаем тип фишки
 
-  if (i_difference == -2 && j_difference == 0) {
-    (*board).at(old_i + 1).at(old_j) = "---";
-
-  } else if (i_difference == 0 && j_difference == 2) {
-    (*board).at(old_i).at(old_j - 1) = "---";
-
-  } else if (i_difference == 2 && j_difference == 0) {
-    (*board).at(old_i - 1).at(old_j) = "---";
-
-  } else if (i_difference == 0 && j_difference == -2) {
-    (*board).at(old_i).at(old_j + 1) = "---";
-  }
-
-
-  (*board).at(old_i).at(old_j) = "---";
-  (*board).at(new_i).at(new_j) = letter + std::to_string(new_i) + std::to_string(new_j);
+    (*board).at(old_i).at(old_j) = "---"; // Освобождаем старую клетку
+    (*board).at(new_i).at(new_j) = letter + std::to_string(new_i) + std::to_string(new_j); // Перемещаем фишку на новую клетку
 }
-//Проверка прыжка ПК
-bool check_jumps(Table board, int old_i, int old_j, int via_i, int via_j, int new_i, int new_j) 
-{
-  if (new_i > 8 || new_i < 0) {
-    return false;
-  }
-  if (new_j > 8 || new_j < 0) {
-    return false;
-  }
-  if (board.at(via_i).at(via_j) == "---") {
-    return false;
-  }
-  if (board.at(via_i).at(via_j).at(0) == 'c') {
-    return false;
-  }
-  if (board.at(new_i).at(new_j) != "---") {
-    return false;
-  }
-  if (board.at(old_i).at(old_j) == "---") {
-    return false;
-  }
-  if (board.at(old_i).at(old_j).at(0) == 'b' ||
-      board.at(old_i).at(old_j).at(0) == 'K') {
-    return false;
-  }
-  return true;
-}
+
+
 // Проверка хода пк
 bool check_moves(Table board, int old_i, int old_j, int new_i, int new_j) {
-  if (new_i > 8 || new_i < 0) {
-    return false;
-  }
-  if (new_j > 8 || new_j < 0) {
-    return false;
-  }
-  if (board.at(old_i).at(old_j) == "---") {
-    return false;
-  }
-  if (board.at(new_i).at(new_j) != "---") {
-    return false;
-  }
-  if (board.at(old_i).at(old_j).at(0) == 'b' ||
-      board.at(old_i).at(old_j).at(0) == 'K') {
-    return false;
-  }
-  if (board.at(new_i).at(new_j) == "---") {
-    return true;
-  }
+    if (new_i > 8 || new_i < 0 || new_j > 8 || new_j < 0) {
+        return false;
+    }
+    if (board.at(old_i).at(old_j) == "---") {
+        return false;
+    }
+    if (board.at(new_i).at(new_j) != "---") {
+        return false;
+    }
+    if (board.at(old_i).at(old_j).at(0) == 'b' || board.at(old_i).at(old_j).at(0) == 'K') {
+        return false;
+    }
+    if (old_i == new_i && old_j == new_j) {
+        return false;
+    }
+    if (old_i != new_i && old_j == new_j) {
+        if (old_i < new_i) {
+            for (int i = 1; i < new_i - old_i;++i) {
+                if (board.at(old_i+i).at(new_j) != "---")
+                    return false;
+            }
+        }
+        else {
+            for (int i = 1; i < old_i - new_i; ++i) {
+                if (board.at(old_i - i).at(new_j) != "---")
+                    return false;
+            }
+        }
+    }
+    else if (old_j != new_j && old_i == new_i) {
+        if (old_j < new_j) {
+            for (int i = 1; i < new_j - old_j; ++i) {
+                if (board.at(old_i).at(old_j + i) != "---")
+                    return false;
+            }
+        }
+        else {
+            for (int i = 1; i < old_j - new_j; ++i) {
+                if (board.at(old_i).at(old_j - i) != "---")
+                    return false;
+            }
+        }
+    }
+    if (board.at(new_i).at(new_j) == "---") {
+        return true;
+    }
 }
 
-// Поиск доступных ходов
+// Поиск доступных ходов ПК
 vector<vector<int>> find_available_moves(Table board) 
 {
-    // Вектор, в который будут добавляться доступные ходы
+    // Вектор, в который будут добавляться доступные ходы в виде {int old_i, int old_j, int new_i, int new_j}
     vector<vector<int>> available_moves;
-
-    // Вектор, в который будут добавляться доступные прыжки
-    vector<vector<int>> available_jumps;
 
     // Перебираем каждую клетку на доске
     for (int m = 0; m < 9; m++) {
         for (int n = 0; n < 9; n++) {
             // Если на текущей клетке находится фигура игрока 'c'
             if (board.at(m).at(n).at(0) == 'c') {
-                // Проверяем возможные ходы вверх
-                if (check_moves(board, m, n, m - 1, n))
-                    available_moves.push_back({ m, n, m - 1, n });
-                if (check_moves(board, m, n, m - 2, n))
-                    available_moves.push_back({ m, n, m - 2, n });
-                if (check_moves(board, m, n, m - 3, n))
-                    available_moves.push_back({ m, n, m - 3, n });
-                if (check_moves(board, m, n, m - 4, n))
-                    available_moves.push_back({ m, n, m - 4, n });
-                if (check_moves(board, m, n, m - 5, n))
-                    available_moves.push_back({ m, n, m - 5, n });
-                if (check_moves(board, m, n, m - 6, n))
-                    available_moves.push_back({ m, n, m - 6, n });
-                if (check_moves(board, m, n, m - 7, n))
-                    available_moves.push_back({ m, n, m - 7, n });
-                if (check_moves(board, m, n, m - 8, n))
-                    available_moves.push_back({ m, n, m - 8, n });
-                // Проверяем возможные ходы вниз
-                if (check_moves(board, m, n, m + 1, n))
-                    available_moves.push_back({ m, n, m + 1, n });
-                if (check_moves(board, m, n, m + 2, n))
-                    available_moves.push_back({ m, n, m + 2, n });
-                if (check_moves(board, m, n, m + 3, n))
-                    available_moves.push_back({ m, n, m + 3, n });
-                if (check_moves(board, m, n, m + 4, n))
-                    available_moves.push_back({ m, n, m + 4, n });
-                if (check_moves(board, m, n, m + 5, n))
-                    available_moves.push_back({ m, n, m + 5, n });
-                if (check_moves(board, m, n, m + 6, n))
-                    available_moves.push_back({ m, n, m + 6, n });
-                if (check_moves(board, m, n, m + 7, n))
-                    available_moves.push_back({ m, n, m + 7, n });
-                if (check_moves(board, m, n, m + 8, n))
-                    available_moves.push_back({ m, n, m + 8, n });
-                // Проверяем возможные ходы влево
-                if (check_moves(board, m, n, m, n - 1))
-                    available_moves.push_back({ m, n, m, n - 1 });
-                if (check_moves(board, m, n, m, n - 2))
-                    available_moves.push_back({ m, n, m, n - 2 });
-                if (check_moves(board, m, n, m, n - 3))
-                    available_moves.push_back({ m, n, m, n - 3 });
-                if (check_moves(board, m, n, m, n - 4))
-                    available_moves.push_back({ m, n, m, n - 4 });
-                if (check_moves(board, m, n, m, n - 5))
-                    available_moves.push_back({ m, n, m, n - 5 });
-                if (check_moves(board, m, n, m, n - 6))
-                    available_moves.push_back({ m, n, m, n - 6 });
-                if (check_moves(board, m, n, m, n - 7))
-                    available_moves.push_back({ m, n, m, n - 7 });
-                if (check_moves(board, m, n, m, n - 8))
-                    available_moves.push_back({ m, n, m, n - 8 });
-                // Проверяем возможные ходы вправо
-                if (check_moves(board, m, n, m, n + 1))
-                    available_moves.push_back({ m, n, m, n + 1 });
-                if (check_moves(board, m, n, m, n + 2))
-                    available_moves.push_back({ m, n, m, n + 2 });
-                if (check_moves(board, m, n, m, n + 3))
-                    available_moves.push_back({ m, n, m, n + 3 });
-                if (check_moves(board, m, n, m, n + 4))
-                    available_moves.push_back({ m, n, m, n + 4 });
-                if (check_moves(board, m, n, m, n + 5))
-                    available_moves.push_back({ m, n, m, n + 5 });
-                if (check_moves(board, m, n, m, n + 6))
-                    available_moves.push_back({ m, n, m, n + 6 });
-                if (check_moves(board, m, n, m, n + 7))
-                    available_moves.push_back({ m, n, m, n + 7 });
-                if (check_moves(board, m, n, m, n + 8))
-                    available_moves.push_back({ m, n, m, n + 8 });
-                //// Проверяем возможные ходы вверх-влево
-                //if (check_moves(board, m, n, m - 1, n - 1))
-                //    available_moves.push_back({ m, n, m - 1, n - 1 });
-                //// Проверяем возможные ходы вверх-вправо
-                //if (check_moves(board, m, n, m - 1, n + 1))
-                //    available_moves.push_back({ m, n, m - 1, n + 1 });
-                //// Проверяем возможные ходы вниз-влево
-                //if (check_moves(board, m, n, m + 1, n - 1))
-                //    available_moves.push_back({ m, n, m + 1, n - 1 });
-                //// Проверяем возможные ходы вниз-вправо
-                //if (check_moves(board, m, n, m + 1, n + 1))
-                //    available_moves.push_back({ m, n, m + 1, n + 1 });
+                for (int c = 1; c <= 8; ++c) {
+                    // Проверяем возможные ходы вверх
+                    if (check_moves(board, m, n, m - c, n))
+                        available_moves.push_back({ m, n, m - c, n });
+                    // Проверяем возможные ходы вниз
+                    if (check_moves(board, m, n, m + c, n))
+                        available_moves.push_back({ m, n, m + c, n });
+                    // Проверяем возможные ходы влево
+                    if (check_moves(board, m, n, m, n - c))
+                        available_moves.push_back({ m, n, m, n - c });
+                    // Проверяем возможные ходы вправо
+                    if (check_moves(board, m, n, m, n + c))
+                        available_moves.push_back({ m, n, m, n + c });
+                }
             }
         }
     }
@@ -341,138 +254,51 @@ int evaluation_function(Table board) //оф
   return result + (mine - (opp - 1)) - 8;
 }
 
-static vector<vector<int>> find_player_available_moves(Table board)  //ходы
+// Поиск доступных ходов игрока
+static vector<vector<int>> find_player_available_moves(Table board)
 {
-  vector<vector<int>> available_moves;
-  vector<vector<int>> available_jumps;
-  for (int m = 0; m < 9; m++) {
-    for (int n = 0; n < 9; n++) {
-        if (board.at(m).at(n).at(0) == 'b') {
-            if (check_player_moves(board, m, n, m - 1, n))
-                available_moves.push_back({ m, n, m - 1, n });
-            if (check_player_moves(board, m, n, m - 2, n))
-                available_moves.push_back({ m, n, m - 2, n });
-            if (check_player_moves(board, m, n, m - 3, n))
-                available_moves.push_back({ m, n, m - 3, n });
-            if (check_player_moves(board, m, n, m - 4, n))
-                available_moves.push_back({ m, n, m - 4, n });
-            if (check_player_moves(board, m, n, m - 5, n))
-                available_moves.push_back({ m, n, m - 5, n });
-            if (check_player_moves(board, m, n, m - 6, n))
-                available_moves.push_back({ m, n, m - 6, n });
-            if (check_player_moves(board, m, n, m - 7, n))
-                available_moves.push_back({ m, n, m - 7, n });
-            if (check_player_moves(board, m, n, m - 8, n))
-                available_moves.push_back({ m, n, m - 8, n });
-            if (check_player_moves(board, m, n, m + 1, n))
-                available_moves.push_back({ m, n, m + 1, n });
-            if (check_player_moves(board, m, n, m + 2, n))
-                available_moves.push_back({ m, n, m + 2, n });
-            if (check_player_moves(board, m, n, m + 3, n))
-                available_moves.push_back({ m, n, m + 3, n });
-            if (check_player_moves(board, m, n, m + 4, n))
-                available_moves.push_back({ m, n, m + 4, n });
-            if (check_player_moves(board, m, n, m + 5, n))
-                available_moves.push_back({ m, n, m + 5, n });
-            if (check_player_moves(board, m, n, m + 6, n))
-                available_moves.push_back({ m, n, m + 6, n });
-            if (check_player_moves(board, m, n, m + 7, n))
-                available_moves.push_back({ m, n, m + 7, n });
-            if (check_player_moves(board, m, n, m + 8, n))
-                available_moves.push_back({ m, n, m + 8, n });
-            if (check_player_moves(board, m, n, m, n - 1))
-                available_moves.push_back({ m, n, m, n - 1 });
-            if (check_player_moves(board, m, n, m, n - 2))
-                available_moves.push_back({ m, n, m, n - 2 });
-            if (check_player_moves(board, m, n, m, n - 3))
-                available_moves.push_back({ m, n, m, n - 3 });
-            if (check_player_moves(board, m, n, m, n - 4))
-                available_moves.push_back({ m, n, m, n - 4 });
-            if (check_player_moves(board, m, n, m, n - 5))
-                available_moves.push_back({ m, n, m, n - 5 });
-            if (check_player_moves(board, m, n, m, n - 6))
-                available_moves.push_back({ m, n, m, n - 6 });
-            if (check_player_moves(board, m, n, m, n - 7))
-                available_moves.push_back({ m, n, m, n - 7 });
-            if (check_player_moves(board, m, n, m, n - 8))
-                available_moves.push_back({ m, n, m, n - 8 });
-            if (check_player_moves(board, m, n, m, n + 1))
-                available_moves.push_back({ m, n, m, n + 1 });
-            if (check_player_moves(board, m, n, m, n + 2))
-                available_moves.push_back({ m, n, m, n + 2 });
-            if (check_player_moves(board, m, n, m, n + 3))
-                available_moves.push_back({ m, n, m, n + 3 });
-            if (check_player_moves(board, m, n, m, n + 4))
-                available_moves.push_back({ m, n, m, n + 4 });
-            if (check_player_moves(board, m, n, m, n + 5))
-                available_moves.push_back({ m, n, m, n + 5 });
-            if (check_player_moves(board, m, n, m, n + 6))
-                available_moves.push_back({ m, n, m, n + 6 });
-            if (check_player_moves(board, m, n, m, n + 7))
-                available_moves.push_back({ m, n, m, n + 7 });
-            if (check_player_moves(board, m, n, m, n + 8))
-                available_moves.push_back({ m, n, m, n + 8 });
-            /*if (check_player_jumps(board, m, n, m - 1, n, m - 2, n))
-                available_jumps.push_back({ m, n, m - 2, n });
-            if (check_player_jumps(board, m, n, m + 1, n, m + 2, n))
-                available_jumps.push_back({ m, n, m + 2, n });
-            if (check_player_jumps(board, m, n, m, n + 1, m, n + 2))
-                available_jumps.push_back({ m, n, m, n + 2 });
-            if (check_player_jumps(board, m, n, m, n - 1, m, n - 2))
-                available_jumps.push_back({ m, n, m, n - 2 });*/
+    // Вектор, в который будут добавляться доступные ходы в виде {int old_i, int old_j, int new_i, int new_j}
+    vector<vector<int>> available_moves;
+
+    // Перебираем каждую клетку на доске
+    for (int m = 0; m < 9; m++) {
+        for (int n = 0; n < 9; n++) {
+            // Если на текущей клетке находится фигура игрока 'b'
+            if (board.at(m).at(n).at(0) == 'b') {
+                for (int c = 1; c <= 8; ++c) {
+                    // Проверяем возможные ходы вверх
+                    if (check_player_moves(board, m, n, m - c, n))
+                        available_moves.push_back({ m, n, m - c, n });
+                    // Проверяем возможные ходы вниз
+                    if (check_player_moves(board, m, n, m + c, n))
+                        available_moves.push_back({ m, n, m + c, n });
+                    // Проверяем возможные ходы влево
+                    if (check_player_moves(board, m, n, m, n - c))
+                        available_moves.push_back({ m, n, m, n - c });
+                    // Проверяем возможные ходы вправо
+                    if (check_player_moves(board, m, n, m, n + c))
+                        available_moves.push_back({ m, n, m, n + c });
+                }
+            }
+            else if (board.at(m).at(n).at(0) == 'K') {
+                for (int c = 1; c <= 3; ++c) {
+                    // Проверяем возможные ходы вверх
+                    if (check_player_moves(board, m, n, m - c, n))
+                        available_moves.push_back({ m, n, m - c, n });
+                    // Проверяем возможные ходы вниз
+                    if (check_player_moves(board, m, n, m + c, n))
+                        available_moves.push_back({ m, n, m + c, n });
+                    // Проверяем возможные ходы влево
+                    if (check_player_moves(board, m, n, m, n - c))
+                        available_moves.push_back({ m, n, m, n - c });
+                    // Проверяем возможные ходы вправо
+                    if (check_player_moves(board, m, n, m, n + c))
+                        available_moves.push_back({ m, n, m, n + c });
+                }
+            }
         }
-        else if (board.at(m).at(n).at(0) == 'K') {
-            if (check_player_moves(board, m, n, m - 1, n))
-                available_moves.push_back({ m, n, m - 1, n });
-            if (check_player_moves(board, m, n, m - 2, n))
-                available_moves.push_back({ m, n, m - 2, n });
-            if (check_player_moves(board, m, n, m - 3, n))
-                available_moves.push_back({ m, n, m - 3, n });
-            if (check_player_moves(board, m, n, m + 1, n))
-                available_moves.push_back({ m, n, m + 1, n });
-            if (check_player_moves(board, m, n, m + 2, n))
-                available_moves.push_back({ m, n, m + 2, n });
-            if (check_player_moves(board, m, n, m + 3, n))
-                available_moves.push_back({ m, n, m + 3, n });
-            if (check_player_moves(board, m, n, m, n - 1))
-                available_moves.push_back({ m, n, m, n - 1 });
-            if (check_player_moves(board, m, n, m, n - 2))
-                available_moves.push_back({ m, n, m, n - 2 });
-            if (check_player_moves(board, m, n, m, n - 3))
-                available_moves.push_back({ m, n, m, n - 3 });
-            if (check_player_moves(board, m, n, m, n + 1))
-                available_moves.push_back({ m, n, m, n + 1 });
-            if (check_player_moves(board, m, n, m, n + 2))
-                available_moves.push_back({ m, n, m, n + 2 });
-            if (check_player_moves(board, m, n, m, n + 3))
-                available_moves.push_back({ m, n, m, n + 3 });
-            /*if (check_player_jumps(board, m, n, m - 1, n, m - 2, n))
-                available_jumps.push_back({ m, n, m - 2, n });
-            if (check_player_jumps(board, m, n, m + 1, n, m + 2, n))
-                available_jumps.push_back({ m, n, m + 2, n });
-            if (check_player_jumps(board, m, n, m, n + 1, m, n + 2))
-                available_jumps.push_back({ m, n, m, n + 2 });
-            if (check_player_jumps(board, m, n, m, n - 1, m, n - 2))
-                available_jumps.push_back({ m, n, m, n - 2 });*/
-      }
     }
-  }
-  return available_moves;/*
-  if (!mandatory_jumping) {
- 
-    available_jumps.reserve(
-        available_jumps.size() +
-        distance(available_moves.begin(), available_moves.end()));
-    available_jumps.insert(available_jumps.end(), available_moves.begin(),
-                           available_moves.end());
-    return available_jumps;
-  } else {
-    if (available_jumps.size() == 0) {
-      return available_moves;
-    } else {
-      return available_jumps;
-    }
-  }*/
+    return available_moves;
 }
 
 class Node {
@@ -497,36 +323,42 @@ class Node {
     this->value = value;
   }
 
+  // Генерирует все возможные состояния игры для текущего состояния
   vector<Node> get_children(bool minimizing_player) {
-    vector<vector<int>> available_moves;
-    vector<Node> children_states;
-    Table current_state(board);
-    string big_letter;
-    int queen_row;
-    if (minimizing_player == true) {
-        available_moves = find_available_moves(current_state);
-        big_letter = 'C';
-        queen_row = 0;
-    }
-    else {
-        available_moves =
-            find_player_available_moves(current_state);
-        big_letter = 'K';
-        queen_row = 0;
-    }
-    for (int i = 0; i < available_moves.size(); i++) {
-      int old_i = available_moves.at(i).at(0);
-      int old_j = available_moves.at(i).at(1);
-      int new_i = available_moves.at(i).at(2);
-      int new_j = available_moves.at(i).at(3);
-      Table state(current_state);
-      make_a_move(&state, old_i, old_j, new_i, new_j, big_letter.at(0), queen_row);
-      vector<int> new_move = {old_i, old_j, new_i, new_j};
-      Node child(state, new_move, this);
-      children_states.push_back(child);
-    }
-    return children_states;
+      vector<vector<int>> available_moves;              // Вектор для хранения доступных ходов
+      vector<Node> children_states;                     // Вектор для хранения дочерних состояний
+      Table current_state(board);                       // Создаем объект текущего состояния игры
+
+      string big_letter;                                // Переменная для хранения большой буквы, обозначающей фишку
+
+      // Определяем доступные ходы в зависимости от текущего игрока
+      if (minimizing_player == true) {
+          available_moves = find_available_moves(current_state);
+          big_letter = 'C'; // Фишки компьютера обозначаются 'C'
+      }
+      else {
+          available_moves = find_player_available_moves(current_state);
+          big_letter = 'K'; // Фишки игрока обозначаются 'K'
+      }
+
+      // Проходим по всем доступным ходам и создаем дочернее состояние для каждого хода
+      for (int i = 0; i < available_moves.size(); i++) {
+          // Получение координат для данного хода из вектора ходов available_moves
+          int old_i = available_moves.at(i).at(0);
+          int old_j = available_moves.at(i).at(1);
+          int new_i = available_moves.at(i).at(2);
+          int new_j = available_moves.at(i).at(3);
+
+          Table state(current_state);                                           // Создаем копию текущего состояния
+          make_a_move(&state, old_i, old_j, new_i, new_j, big_letter.at(0));    // Выполняем ход
+          vector<int> new_move = { old_i, old_j, new_i, new_j };                // Создаем вектор с координатами хода
+          Node child(state, new_move, this);                                    // Создаем дочернее состояние с новым игровым полем и ходом
+          children_states.push_back(child);                                     // Добавляем дочернее состояние в вектор
+      }
+
+      return children_states; // Возвращаем вектор дочерних состояний
   }
+
 
   void set_value(int value) { this->value = value; }
 
@@ -600,307 +432,321 @@ int minimax(Table board, int depth, int alpha, int beta, bool maximizing_player)
 }
 
 class Checkers {
- private:
-     Table matrix = { {}, {}, {}, {}, {}, {}, {}, {}, {} }; // Создание пустой матрицы 9x9 для игрового поля
-     bool player_turn = true;               // Переменная, указывающая, чей сейчас ход (true - ход игрока, false - ход компьютера)
-     int computer_pieces = 16;              // Количество фишек у компьютера в начале игры
-     int player_pieces = 8;                 // Количество фишек у игрока в начале игры
-     int king = 1;                          // Переменная, указывающая, есть ли король на игровом поле (1 - есть, 0 - нет)
-     vector<Table> available_moves;         // Вектор, содержащий доступные ходы для текущего игрока
-     bool mandatory_jumping = false;        // Переменная, указывающая, есть ли обязательные прыжки для текущего игрока
-     int depth = 1;                         // Глубина поиска для алгоритма принятия решений компьютера (уровень сложности)
+private:
+    Table matrix = { {}, {}, {}, {}, {}, {}, {}, {}, {} }; // Создание пустой матрицы 9x9 для игрового поля
+    bool player_turn = true;               // Переменная, указывающая, чей сейчас ход (true - ход игрока, false - ход компьютера)
+    int computer_pieces = 16;              // Количество фишек у компьютера в начале игры
+    int player_pieces = 8;                 // Количество фишек у игрока в начале игры
+    int king = 1;                          // Переменная, указывающая, есть ли король на игровом поле (1 - есть, 0 - нет)
+    vector<Table> available_moves;         // Вектор, содержащий доступные ходы для текущего игрока
+    bool mandatory_jumping = false;        // Переменная, указывающая, есть ли обязательные прыжки для текущего игрока
+    int depth = 1;                         // Глубина поиска для алгоритма принятия решений компьютера (уровень сложности)
 
 
- public:
-  Checkers() {
-    for (vector<string>& row : matrix) {
-      for (int i = 0; i < 9; i++) {
-        row.push_back("---");
-      }
-    }
-    position_computer();
-    position_player();
-    king1();
-    exitplay();
-  }
-
-  Checkers(int depth) : Checkers() { this->depth = depth; }
-
-  void position_computer() {
-    for (int i = 0; i < 9; i++) {
-      for (int j = 0; j < 9; j++) {
-          matrix.at(4).at(1) = ('c' + std::to_string(i) + std::to_string(j));    //расстановка фишек врага
-          matrix.at(4).at(0) = ('c' + std::to_string(i) + std::to_string(j));
-          matrix.at(5).at(0) = ('c' + std::to_string(i) + std::to_string(j));
-          matrix.at(3).at(0) = ('c' + std::to_string(i) + std::to_string(j));
-          matrix.at(0).at(4) = ('c' + std::to_string(i) + std::to_string(j));
-          matrix.at(0).at(5) = ('c' + std::to_string(i) + std::to_string(j));
-          matrix.at(0).at(3) = ('c' + std::to_string(i) + std::to_string(j));
-          matrix.at(1).at(4) = ('c' + std::to_string(i) + std::to_string(j));
-          matrix.at(8).at(5) = ('c' + std::to_string(i) + std::to_string(j));
-          matrix.at(8).at(3) = ('c' + std::to_string(i) + std::to_string(j));
-          matrix.at(8).at(4) = ('c' + std::to_string(i) + std::to_string(j));
-          matrix.at(7).at(4) = ('c' + std::to_string(i) + std::to_string(j));
-          matrix.at(4).at(8) = ('c' + std::to_string(i) + std::to_string(j));
-          matrix.at(4).at(7) = ('c' + std::to_string(i) + std::to_string(j));
-          matrix.at(3).at(8) = ('c' + std::to_string(i) + std::to_string(j));
-          matrix.at(5).at(8) = ('c' + std::to_string(i) + std::to_string(j));
-      }
-    }
-  }
-  void position_player() {
-    for (int i = 2; i < 7; i++) {
-      for (int j = 2; j < 7; j++) {
-          matrix.at(4).at(5) = ('b' + std::to_string(i) + std::to_string(j));         //расстановка фишек игрока
-          matrix.at(4).at(6) = ('b' + std::to_string(i) + std::to_string(j));
-          matrix.at(4).at(3) = ('b' + std::to_string(i) + std::to_string(j));
-          matrix.at(4).at(2) = ('b' + std::to_string(i) + std::to_string(j));
-          matrix.at(3).at(4) = ('b' + std::to_string(i) + std::to_string(j));
-          matrix.at(2).at(4) = ('b' + std::to_string(i) + std::to_string(j));
-          matrix.at(5).at(4) = ('b' + std::to_string(i) + std::to_string(j));
-          matrix.at(6).at(4) = ('b' + std::to_string(i) + std::to_string(j));
-      }
-    }
-  }
-
-  void king1() {
-      for (int i = 0; i < 9; i++) {
-          for (int j = 0; j < 9; j++) {
-              matrix.at(4).at(4) = ('K' + std::to_string(i) + std::to_string(j));
-          }
-      }
-  }
-
-  void exitplay() {
-      for (int i = 0; i < 9; i++) {
-          for (int j = 0; j < 9; j++) {
-              matrix.at(0).at(0) = ('X' + std::to_string(i) + std::to_string(j));
-              matrix.at(0).at(8) = ('X' + std::to_string(i) + std::to_string(j));         //расстановка выходов
-              matrix.at(8).at(0) = ('X' + std::to_string(i) + std::to_string(j));
-              matrix.at(8).at(8) = ('X' + std::to_string(i) + std::to_string(j));
-          }
-      }
-  }
-
-  void print_matrix()  //отрисовка поля
-  {
-    int i = 0;
-    std::cout << std::endl;
-    for (auto row : this->matrix) {
-      std::cout << i << "  |";
-      i += 1;
-      for (auto elem : row) {
-        if (elem.at(0) == 'c') {
-          std::cout << ansi_red << elem << ansi_reset << " ";
-        } else if (elem.at(0) == 'b') {
-          std::cout << ansi_green << elem << ansi_reset << " ";
+public:
+    Checkers() {
+        for (vector<string>& row : matrix) {
+            for (int i = 0; i < 9; i++) {
+                row.push_back("---");
+            }
         }
-        else if (elem.at(0) == 'K') {
-            std::cout << ansi_yellow << elem << ansi_reset << " ";
+        position_computer();
+        position_player();
+        king1();
+        exitplay();
+    }
+
+    Checkers(int depth) : Checkers() { this->depth = depth; }
+
+    void position_computer() {
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                matrix.at(4).at(1) = ('c' + std::to_string(i) + std::to_string(j));    //расстановка фишек врага
+                matrix.at(4).at(0) = ('c' + std::to_string(i) + std::to_string(j));
+                matrix.at(5).at(0) = ('c' + std::to_string(i) + std::to_string(j));
+                matrix.at(3).at(0) = ('c' + std::to_string(i) + std::to_string(j));
+                matrix.at(0).at(4) = ('c' + std::to_string(i) + std::to_string(j));
+                matrix.at(0).at(5) = ('c' + std::to_string(i) + std::to_string(j));
+                matrix.at(0).at(3) = ('c' + std::to_string(i) + std::to_string(j));
+                matrix.at(1).at(4) = ('c' + std::to_string(i) + std::to_string(j));
+                matrix.at(8).at(5) = ('c' + std::to_string(i) + std::to_string(j));
+                matrix.at(8).at(3) = ('c' + std::to_string(i) + std::to_string(j));
+                matrix.at(8).at(4) = ('c' + std::to_string(i) + std::to_string(j));
+                matrix.at(7).at(4) = ('c' + std::to_string(i) + std::to_string(j));
+                matrix.at(4).at(8) = ('c' + std::to_string(i) + std::to_string(j));
+                matrix.at(4).at(7) = ('c' + std::to_string(i) + std::to_string(j));
+                matrix.at(3).at(8) = ('c' + std::to_string(i) + std::to_string(j));
+                matrix.at(5).at(8) = ('c' + std::to_string(i) + std::to_string(j));
+            }
         }
-        else {
-          std::cout << elem << " ";
+    }
+    void position_player() {
+        for (int i = 2; i < 7; i++) {
+            for (int j = 2; j < 7; j++) {
+                matrix.at(4).at(5) = ('b' + std::to_string(i) + std::to_string(j));         //расстановка фишек игрока
+                matrix.at(4).at(6) = ('b' + std::to_string(i) + std::to_string(j));
+                matrix.at(4).at(3) = ('b' + std::to_string(i) + std::to_string(j));
+                matrix.at(4).at(2) = ('b' + std::to_string(i) + std::to_string(j));
+                matrix.at(3).at(4) = ('b' + std::to_string(i) + std::to_string(j));
+                matrix.at(2).at(4) = ('b' + std::to_string(i) + std::to_string(j));
+                matrix.at(5).at(4) = ('b' + std::to_string(i) + std::to_string(j));
+                matrix.at(6).at(4) = ('b' + std::to_string(i) + std::to_string(j));
+            }
         }
-      }
-      std::cout << std::endl;
     }
-    std::cout << std::endl;
-    for (int j = 0; j < 9; j++) {
-      string temp = std::to_string(j);
-      if (j == 0) {
-        temp = "     0";
-      }
-      std::cout << temp << "   ";
+
+    void king1() {
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                matrix.at(4).at(4) = ('K' + std::to_string(i) + std::to_string(j));
+            }
+        }
     }
-    std::cout << std::endl;
-  }
 
-  // Доступные ходы игрока
-  void get_player_input()
-  {
-      // Находим доступные ходы для игрока на текущем игровом поле
-      vector<vector<int>> available_moves = find_player_available_moves(matrix);
-
-      // Если доступные ходы отсутствуют
-      if (available_moves.empty()) {
-          // Проверяем условие поражения или окончания игры
-          if (computer_pieces > player_pieces) {
-              cout << ansi_red
-                  << "У вас не осталось ходов, и компьютер имеет больше фишек чем вы.\n "
-                  "Вы проиграли!"
-                  << ansi_reset << endl;
-              return;
-          }
-          else {
-              cout << ansi_yellow << "У вас не осталось ходов.\nИгра окончена!"
-                  << ansi_reset << endl;
-              return;
-          }
-      }
-
-      // Обнуляем количество фишек и короля у игрока и компьютера
-      player_pieces = 0;
-      computer_pieces = 0;
-      king = 0;
-
-      // Бесконечный цикл для ввода ходов от игрока
-      while (true) {
-          string coord1, coord2;
-          int old_i, old_j, new_i, new_j;
-          cout << "Выберите фишку которой хотите сходить[i,j]: ";
-          cin >> coord1;
-
-          // Обработка ввода сдачи игры
-          if (coord1 == "") {
-              cout << ansi_cyan << "Игра окончена!" << ansi_reset << endl;
-              return;
-          }
-          else if (coord1 == "s") {
-              cout << ansi_cyan << "Вы сдались." << ansi_reset << endl;
-              return;
-          }
-
-          cout << "Выберите место куда её поставить[i,j]:";
-          cin >> coord2;
-
-          // Обработка ввода сдачи игры
-          if (coord2 == "") {
-              cout << ansi_cyan << "Игра окончена!" << ansi_reset << endl;
-              return;
-          }
-          else if (coord2 == "s") {
-              cout << ansi_cyan << "Вы сдались." << ansi_reset << endl;
-              return;
-          }
-
-          // Разбиваем введенные координаты на составляющие
-          vector<string> old_coord = split_string(coord1, ',');
-          vector<string> new_coord = split_string(coord2, ',');
-
-          // Проверка корректности ввода координат
-          if (old_coord.size() != 2 || new_coord.size() != 2) {
-              cout << ansi_red << "Неправильный ввод" << ansi_reset << endl;
-              continue;
-          }
-
-          try {
-              old_i = stoi(old_coord.at(0));
-              old_j = stoi(old_coord.at(1));
-              new_i = stoi(new_coord.at(0));
-              new_j = stoi(new_coord.at(1));
-          }
-          catch (const std::exception& e) {
-              cout << ansi_red << "Неправильный ввод" << ansi_reset << endl;
-              continue;
-          }
-
-          vector<int> move = { old_i, old_j, new_i, new_j };
-
-          // Проверка корректности хода
-          if (find(available_moves.begin(), available_moves.end(), move) == available_moves.end()) {
-              cout << ansi_red << "Неправильный ход!" << ansi_reset << endl;
-              continue;
-          }
-
-          // Выполнение хода игрока
-          make_a_move(&matrix, old_i, old_j, new_i, new_j, 'K', 1);
-
-          // Обновление количества фишек и короля у игрока и компьютера
-          for (int m = 0; m < 9; m++) {
-              for (int n = 0; n < 9; n++) {
-                  if (matrix.at(m).at(n).at(0) == 'c') {
-                      computer_pieces++;
-                  }
-                  else if (matrix.at(m).at(n).at(0) == 'b') {
-                      player_pieces++;
-                  }
-                  else if (matrix.at(m).at(n).at(0) == 'K') {
-                      king++;
-                  };
-              }
-          }
-
-          break; // Выход из цикла после успешного хода
-      }
-  }
-
-
-  void evaluate_states() 
-  {
-    double t1 = time(NULL);
-    Node current_state(matrix);
-
-    vector<Node> first_computer_moves =
-        current_state.get_children(true);
-    if (first_computer_moves.size() == 0) {
-      if (player_pieces > computer_pieces) {
-        cout << ansi_yellow +
-                    "У компьютера не осталось свободных ходов, и у "
-                    "вас осталось больше фишек чем у компьютера.\nВы выиграли!" +
-                    ansi_reset;
-        return;
-      } else {
-        cout << ansi_yellow +
-                    "У компьютера не осталось свободных ходов.\nИгра окончена!" +
-                    ansi_reset;
-        return;
-      }
+    void exitplay() {
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                matrix.at(0).at(0) = ('X' + std::to_string(i) + std::to_string(j));
+                matrix.at(0).at(8) = ('X' + std::to_string(i) + std::to_string(j));         //расстановка выходов
+                matrix.at(8).at(0) = ('X' + std::to_string(i) + std::to_string(j));
+                matrix.at(8).at(8) = ('X' + std::to_string(i) + std::to_string(j));
+            }
+        }
     }
-    std::map<double, Node> dict;
-    for (int i = 0; i < first_computer_moves.size(); i++) {
-      Node child = first_computer_moves.at(i);
-      double value = minimax(child.get_board(), depth, -INT_MAX, INT_MAX, false);
-      dict.insert(std::pair<double, Node>(value, child));
+    // Отрисовка поля
+    void print_matrix()
+    {
+        int i = 0;
+        std::cout << std::endl;
+        for (auto row : this->matrix) {
+            std::cout << i << "  |";
+            i += 1;
+            for (auto elem : row) {
+                if (elem.at(0) == 'c') {
+                    std::cout << ansi_red << elem << ansi_reset << " ";
+                }
+                else if (elem.at(0) == 'b') {
+                    std::cout << ansi_green << elem << ansi_reset << " ";
+                }
+                else if (elem.at(0) == 'K') {
+                    std::cout << ansi_yellow << elem << ansi_reset << " ";
+                }
+                else {
+                    std::cout << elem << " ";
+                }
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+        for (int j = 0; j < 9; j++) {
+            string temp = std::to_string(j);
+            if (j == 0) {
+                temp = "     0";
+            }
+            std::cout << temp << "   ";
+        }
+        std::cout << std::endl;
     }
-    if (dict.empty()) {
-      cout << ansi_green + "Компьютер загнал себя в угол.\nВы выиграли!" +
-                  ansi_reset;
-      return;
+
+    // Доступные ходы игрока
+    void get_player_input()
+    {
+        // Находим доступные ходы для игрока на текущем игровом поле. Получен вектор ходов (мтарый 
+        vector<vector<int>> available_moves = find_player_available_moves(matrix);
+
+        // Если доступные ходы отсутствуют
+        if (available_moves.empty()) {
+            // Проверяем условие поражения или окончания игры
+            if (computer_pieces > player_pieces) {
+                cout << ansi_red
+                    << "У вас не осталось ходов, и компьютер имеет больше фишек чем вы.\n "
+                    "Вы проиграли!"
+                    << ansi_reset << endl;
+                return;
+            }
+            else {
+                cout << ansi_yellow << "У вас не осталось ходов.\nИгра окончена!"
+                    << ansi_reset << endl;
+                return;
+            }
+        }
+
+        // Обнуляем количество фишек и короля у игрока и компьютера
+        player_pieces = 0;
+        computer_pieces = 0;
+        king = 0;
+
+        // Бесконечный цикл для ввода ходов от игрока
+        while (true) {
+            string coord1, coord2;
+            int old_i, old_j, new_i, new_j;
+            cout << "Выберите фишку которой хотите сходить[i,j]: ";
+            cin >> coord1;
+
+            // Обработка ввода сдачи игры
+            if (coord1 == "") {
+                cout << ansi_cyan << "Игра окончена!" << ansi_reset << endl;
+                return;
+            }
+            else if (coord1 == "s") {
+                cout << ansi_cyan << "Вы сдались." << ansi_reset << endl;
+                return;
+            }
+
+            cout << "Выберите место куда её поставить[i,j]:";
+            cin >> coord2;
+
+            // Обработка ввода сдачи игры
+            if (coord2 == "") {
+                cout << ansi_cyan << "Игра окончена!" << ansi_reset << endl;
+                return;
+            }
+            else if (coord2 == "s") {
+                cout << ansi_cyan << "Вы сдались." << ansi_reset << endl;
+                return;
+            }
+
+            // Разбиваем введенные координаты на составляющие
+            vector<string> old_coord = split_string(coord1, ',');
+            vector<string> new_coord = split_string(coord2, ',');
+
+            // Проверка корректности ввода координат
+            if (old_coord.size() != 2 || new_coord.size() != 2) {
+                cout << ansi_red << "Неправильный ввод" << ansi_reset << endl;
+                continue;
+            }
+
+            try {
+                old_i = stoi(old_coord.at(0));
+                old_j = stoi(old_coord.at(1));
+                new_i = stoi(new_coord.at(0));
+                new_j = stoi(new_coord.at(1));
+            }
+            catch (const std::exception& e) {
+                cout << ansi_red << "Неправильный ввод" << ansi_reset << endl;
+                continue;
+            }
+
+            vector<int> move = { old_i, old_j, new_i, new_j };
+
+            // Проверка корректности хода
+            if (find(available_moves.begin(), available_moves.end(), move) == available_moves.end()) {
+                cout << ansi_red << "Неправильный ход!" << ansi_reset << endl;
+                continue;
+            }
+
+            // Выполнение хода игрока
+            make_a_move(&matrix, old_i, old_j, new_i, new_j, 'K');
+
+            // Обновление количества фишек и короля у игрока и компьютера
+            for (int m = 0; m < 9; m++) {
+                for (int n = 0; n < 9; n++) {
+                    if (matrix.at(m).at(n).at(0) == 'c') {
+                        computer_pieces++;
+                    }
+                    else if (matrix.at(m).at(n).at(0) == 'b') {
+                        player_pieces++;
+                    }
+                    else if (matrix.at(m).at(n).at(0) == 'K') {
+                        king++;
+                    };
+                }
+            }
+
+            break; // Выход из цикла после успешного хода
+        }
     }
-    Table new_board = dict.rbegin()->second.get_board();
-    vector<int> move = dict.rbegin()->second.get_move();
-    matrix = new_board;
-    double t2 = time(NULL);
-    double diff = difftime(t2, t1);
-    cout << "Компьютер сходил с (" << move.at(0) << "," << move.at(1)
-         << ") на (" << move.at(2) << "," << move.at(3) << ").\n";
-    cout << "У него заняло " << diff << " секунд.\n";
-  }
 
-  // Функция игры
-  void play() {
-      cout << ansi_cyan << "##### Оберег ####" << ansi_reset << endl;
-      cout << "\nПравила:" << endl; 
-      cout << "1.Для хода вы заполняете координаты в форме i,j." << endl; 
-      cout << "2.Вы можете сдаться в любой момент, для эттого нажмите 's'." << endl; 
-      cout << endl; 
+    // Просчёт ходов ПК
+    void evaluate_states()
+    {
+        double t1 = time(NULL); // Записываем текущее время
 
-      //cout << "Выбрана глубина (уровень сложности): " << depth << endl;
+        Node current_state(matrix); // Создаем объект текущего состояния игры
 
-      while (true) {
-          print_matrix();                                                   // Выводит текущее состояние поля
+        // Получаем список ходов для компьютера
+        vector<Node> first_computer_moves = current_state.get_children(true);
 
-          if (player_turn == true) {                                        // Если ход игрока
-              cout << ansi_cyan << "\nВаш ход." << ansi_reset << endl; 
-              get_player_input();                                           // Получает координаты хода от игрока
-          }
-          else {                                                            // Если ход компьютера
-              cout << ansi_cyan << "Ход компьютера." << ansi_reset << endl;
-              cout << "Думаю..." << endl;
-              evaluate_states();                                            // Оценивает возможные состояния игры и делает ход компьютер
-          }
+        // Проверяем, есть ли ходы для компьютера
+        if (first_computer_moves.size() == 0) {
+            if (player_pieces > computer_pieces) {
+                cout << ansi_yellow + "У компьютера не осталось свободных ходов, и у вас осталось больше фишек чем у компьютера.\nВы выиграли!" + ansi_reset;
+                return;
+            }
+            else {
+                cout << ansi_yellow + "У компьютера не осталось свободных ходов.\nИгра окончена!" + ansi_reset;
+                return;
+            }
+        }
 
-          if (king == 0 || player_pieces == 0) {                            // Если у игрока не осталось короля
-              print_matrix();
-              cout << ansi_red << "Вы проиграли!" << ansi_reset << endl; 
-              return;
-          }
-          else if (computer_pieces == 0) {                                  // Если у компьютера не осталось фишек (проверка на победу)
-              print_matrix(); 
-              cout << ansi_green << "У компьютера не осталось фишек.\nВы выиграли!" << ansi_reset << endl;
-              return;
-          }
-          player_turn = !player_turn; // Переключает ход между игроком и компьютером
-      }
-  }
+        std::map<double, Node> dict; // Создаем словарь для оцененных состояний
+
+        // Проходим по всем ходам компьютера
+        for (int i = 0; i < first_computer_moves.size(); i++) {
+            Node child = first_computer_moves.at(i);
+            // Оцениваем текущее состояние с использованием алгоритма минимакса
+            double value = minimax(child.get_board(), depth, -INT_MAX, INT_MAX, false);
+            dict.insert(std::pair<double, Node>(value, child)); // Добавляем оцененное состояние в словарь
+
+        }
+
+        // Проверяем, получился ли пустой словарь
+        if (dict.empty()) {
+            cout << ansi_green + "Компьютер загнал себя в угол.\nВы выиграли!" +
+                ansi_reset;
+            return;
+        }
+
+        // Получаем новое состояние игрового поля и ход компьютера из словаря
+        Table new_board = dict.rbegin()->second.get_board();
+        vector<int> move = dict.rbegin()->second.get_move();
+
+        matrix = new_board; // Обновляем игровое поле
+
+        double t2 = time(NULL); // Записываем текущее время
+        double diff = difftime(t2, t1); // Вычисляем разницу времени выполнения
+
+        // Выводим информацию о ходе компьютера и времени выполнения
+        cout << "Компьютер сходил с (" << move.at(0) << "," << move.at(1)
+            << ") на (" << move.at(2) << "," << move.at(3) << ").\n";
+        cout << "У него заняло " << diff << " секунд.\n";
+    }
+
+
+    // Функция игры
+    void play() {
+        cout << ansi_cyan << "##### Оберег ####" << ansi_reset << endl;
+        cout << "\nПравила:" << endl;
+        cout << "1.Для хода вы заполняете координаты в форме i,j." << endl;
+        cout << "2.Вы можете сдаться в любой момент, для эттого нажмите 's'." << endl;
+        cout << endl;
+
+        //cout << "Выбрана глубина (уровень сложности): " << depth << endl;
+
+        while (true) {
+            print_matrix();                                                   // Выводит текущее состояние поля
+
+            if (player_turn == true) {                                        // Если ход игрока
+                cout << ansi_cyan << "\nВаш ход." << ansi_reset << endl;
+                get_player_input();                                           // Получает координаты хода от игрока
+            }
+            else {                                                            // Если ход компьютера
+                cout << ansi_cyan << "Ход компьютера." << ansi_reset << endl;
+                cout << "Думаю..." << endl;
+                evaluate_states();                                            // Оценивает возможные состояния игры и делает ход компьютер
+            }
+
+            if (king == 0 || player_pieces == 0) {                            // Если у игрока не осталось короля
+                print_matrix();
+                cout << ansi_red << "Вы проиграли!" << ansi_reset << endl;
+                return;
+            }
+            else if (computer_pieces == 0) {                                  // Если у компьютера не осталось фишек (проверка на победу)
+                print_matrix();
+                cout << ansi_green << "У компьютера не осталось фишек.\nВы выиграли!" << ansi_reset << endl;
+                return;
+            }
+            player_turn = !player_turn; // Переключает ход между игроком и компьютером
+        }
+    }
 };
