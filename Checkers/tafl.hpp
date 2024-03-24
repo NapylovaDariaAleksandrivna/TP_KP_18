@@ -17,7 +17,6 @@ using std::string;
 using std::vector;
 
 typedef vector<vector<string>> Table;
-typedef std::pair<int, int> pair;
 
 string ansi_black = "\u001b[30m";
 string ansi_red = "\u001b[31m";
@@ -57,15 +56,6 @@ bool check_player_moves(Table board, int old_i, int old_j, int new_i, int new_j)
     if (new_j > 8 || new_j < 0) {
         return false;
     }
-    if (board.at(old_i).at(old_j) == "---") {
-        return false;
-    }
-    if (board.at(new_i).at(new_j) != "---") {
-        return false;
-    }
-    if (board.at(old_i).at(old_j).at(0) == 'c') {
-        return false;
-    }
     if (old_i != new_i && old_j == new_j) {
         if (old_i < new_i) {
             for (int i = 1; i < new_i - old_i; ++i) {
@@ -94,9 +84,72 @@ bool check_player_moves(Table board, int old_i, int old_j, int new_i, int new_j)
             }
         }
     }
+    if (board.at(old_i).at(old_j).at(0)=='K'&&( board[0][0][0] == 'X' || board[0][8][0] == 'X' 
+                                             || board[8][0][0] == 'X' || board[8][8][0] == 'X')) {
+        return true;
+    }
+    if (board.at(old_i).at(old_j) == "---") {
+        return false;
+    }
+    if (board.at(new_i).at(new_j) != "---") {
+        return false;
+    }
+    if (board.at(old_i).at(old_j).at(0) == 'c') {
+        return false;
+    }
+    if (board.at(new_i).at(new_j).at(0) == 'X') {
+        return true;
+    }
+
     if (board.at(new_i).at(new_j) == "---") {
         return true;
     }
+}
+// Поиск доступных ходов игрока
+static vector<vector<int>> find_player_available_moves(Table board)
+{
+    // Вектор, в который будут добавляться доступные ходы в виде {int old_i, int old_j, int new_i, int new_j}
+    vector<vector<int>> available_moves;
+
+    // Перебираем каждую клетку на доске
+    for (int m = 0; m < 9; m++) {
+        for (int n = 0; n < 9; n++) {
+            // Если на текущей клетке находится фигура игрока 'b'
+            if (board.at(m).at(n).at(0) == 'b') {
+                for (int c = 1; c <= 8; ++c) {
+                    // Проверяем возможные ходы вверх
+                    if (check_player_moves(board, m, n, m - c, n))
+                        available_moves.push_back({ m, n, m - c, n });
+                    // Проверяем возможные ходы вниз
+                    if (check_player_moves(board, m, n, m + c, n))
+                        available_moves.push_back({ m, n, m + c, n });
+                    // Проверяем возможные ходы влево
+                    if (check_player_moves(board, m, n, m, n - c))
+                        available_moves.push_back({ m, n, m, n - c });
+                    // Проверяем возможные ходы вправо
+                    if (check_player_moves(board, m, n, m, n + c))
+                        available_moves.push_back({ m, n, m, n + c });
+                }
+            }
+            else if (board.at(m).at(n).at(0) == 'K') {
+                for (int c = 1; c <= 3; ++c) {
+                    // Проверяем возможные ходы вверх
+                    if (check_player_moves(board, m, n, m - c, n))
+                        available_moves.push_back({ m, n, m - c, n });
+                    // Проверяем возможные ходы вниз
+                    if (check_player_moves(board, m, n, m + c, n))
+                        available_moves.push_back({ m, n, m + c, n });
+                    // Проверяем возможные ходы влево
+                    if (check_player_moves(board, m, n, m, n - c))
+                        available_moves.push_back({ m, n, m, n - c });
+                    // Проверяем возможные ходы вправо
+                    if (check_player_moves(board, m, n, m, n + c))
+                        available_moves.push_back({ m, n, m, n + c });
+                }
+            }
+        }
+    }
+    return available_moves;
 }
 
 // Генерация хода
@@ -122,7 +175,6 @@ void make_a_move(Table* board, int old_i, int old_j, int new_i, int new_j)
             (*board).at(new_i).at(new_j) = "---";
             return;
         }
-
         // Проверка слева
         if (new_j - 1 >= 0 && (*board)[new_i][new_j - 1][0] == 'c') {
             if (new_j - 2 >= 0 &&  ((*board)[new_i][new_j - 2][0] == 'K' ||
@@ -139,7 +191,6 @@ void make_a_move(Table* board, int old_i, int old_j, int new_i, int new_j)
                 (*board)[new_i][new_j + 1] = "---";
             }
         }
-
         // Проверка сверху
         if (new_i - 1 >= 0 && (*board)[new_i - 1][new_j][0] == 'c') {
             if (new_i - 2 >= 0 && ((*board)[new_i - 2][new_j][0] == 'K' 
@@ -148,7 +199,6 @@ void make_a_move(Table* board, int old_i, int old_j, int new_i, int new_j)
                 (*board)[new_i-1][new_j] = "---";
             }
         }
-
         // Проверка снизу
         if (new_i + 1 < 9 && (*board)[new_i + 1][new_j][0] == 'c') {
             if (new_i + 2 < 9 &&  ((*board)[new_i + 2][new_j][0] == 'K' 
@@ -212,8 +262,7 @@ void make_a_move(Table* board, int old_i, int old_j, int new_i, int new_j)
 
 }
 
-
-// Проверка хода пк
+// Проверка хода ПК
 bool check_moves(Table board, int old_i, int old_j, int new_i, int new_j) {
     if (new_i > 8 || new_i < 0 || new_j > 8 || new_j < 0) {
         return false;
@@ -262,7 +311,6 @@ bool check_moves(Table board, int old_i, int old_j, int new_i, int new_j) {
         return true;
     }
 }
-
 // Поиск доступных ходов ПК
 vector<vector<int>> find_available_moves(Table board) 
 {
@@ -294,6 +342,7 @@ vector<vector<int>> find_available_moves(Table board)
     return available_moves;
 }
 
+// Функция посчёта фигур
 void count_checker(Table board, int& chips_computer, int& chips_player, int& king_exit) {
     // Обновление количества фишек и короля у игрока и компьютера
     for (int m = 0; m < 9; m++) {
@@ -322,6 +371,7 @@ void count_checker(Table board, int& chips_computer, int& chips_player, int& kin
         }
     }
 }
+// Оценочная функция
 int evaluation_function(Table board)
 {
     int chips_computer = 0, chips_player = 0, king_exit = 0;
@@ -329,59 +379,11 @@ int evaluation_function(Table board)
     return (chips_computer - chips_player) - (2 * king_exit);
 }
 
-
-// Поиск доступных ходов игрока
-static vector<vector<int>> find_player_available_moves(Table board)
-{
-    // Вектор, в который будут добавляться доступные ходы в виде {int old_i, int old_j, int new_i, int new_j}
-    vector<vector<int>> available_moves;
-
-    // Перебираем каждую клетку на доске
-    for (int m = 0; m < 9; m++) {
-        for (int n = 0; n < 9; n++) {
-            // Если на текущей клетке находится фигура игрока 'b'
-            if (board.at(m).at(n).at(0) == 'b') {
-                for (int c = 1; c <= 8; ++c) {
-                    // Проверяем возможные ходы вверх
-                    if (check_player_moves(board, m, n, m - c, n))
-                        available_moves.push_back({ m, n, m - c, n });
-                    // Проверяем возможные ходы вниз
-                    if (check_player_moves(board, m, n, m + c, n))
-                        available_moves.push_back({ m, n, m + c, n });
-                    // Проверяем возможные ходы влево
-                    if (check_player_moves(board, m, n, m, n - c))
-                        available_moves.push_back({ m, n, m, n - c });
-                    // Проверяем возможные ходы вправо
-                    if (check_player_moves(board, m, n, m, n + c))
-                        available_moves.push_back({ m, n, m, n + c });
-                }
-            }
-            else if (board.at(m).at(n).at(0) == 'K') {
-                for (int c = 1; c <= 3; ++c) {
-                    // Проверяем возможные ходы вверх
-                    if (check_player_moves(board, m, n, m - c, n))
-                        available_moves.push_back({ m, n, m - c, n });
-                    // Проверяем возможные ходы вниз
-                    if (check_player_moves(board, m, n, m + c, n))
-                        available_moves.push_back({ m, n, m + c, n });
-                    // Проверяем возможные ходы влево
-                    if (check_player_moves(board, m, n, m, n - c))
-                        available_moves.push_back({ m, n, m, n - c });
-                    // Проверяем возможные ходы вправо
-                    if (check_player_moves(board, m, n, m, n + c))
-                        available_moves.push_back({ m, n, m, n + c });
-                }
-            }
-        }
-    }
-    return available_moves;
-}
-
 class Node {
  private:
-  Table board;
-  int value;
-  vector<int> move;
+  Table board;      //текущее состояние поля
+  int value;        
+  vector<int> move; //вектор хода
   Node* parent;
 
  public:
@@ -434,7 +436,6 @@ class Node {
 
       return children_states; // Возвращаем вектор дочерних состояний
   }
-
 
   void set_value(int value) { this->value = value; }
 
@@ -515,7 +516,6 @@ private:
     int player_pieces = 8;                 // Количество фишек у игрока в начале игры
     int king = 1;                          // Переменная, указывающая, есть ли король на игровом поле (1 - есть, 0 - нет)
     vector<Table> available_moves;         // Вектор, содержащий доступные ходы для текущего игрока
-    bool mandatory_jumping = false;        // Переменная, указывающая, есть ли обязательные прыжки для текущего игрока
     int depth = 1;                         // Глубина поиска для алгоритма принятия решений компьютера (уровень сложности)
 
 
@@ -533,61 +533,46 @@ public:
     }
 
     Checkers(int depth) : Checkers() { this->depth = depth; }
-
+    // Расстановка фишек ПК
     void position_computer() {
-        for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 9; j++) {
-                matrix.at(4).at(1) = ('c' + std::to_string(i) + std::to_string(j));    //расстановка фишек врага
-                matrix.at(4).at(0) = ('c' + std::to_string(i) + std::to_string(j));
-                matrix.at(5).at(0) = ('c' + std::to_string(i) + std::to_string(j));
-                matrix.at(3).at(0) = ('c' + std::to_string(i) + std::to_string(j));
-                matrix.at(0).at(4) = ('c' + std::to_string(i) + std::to_string(j));
-                matrix.at(0).at(5) = ('c' + std::to_string(i) + std::to_string(j));
-                matrix.at(0).at(3) = ('c' + std::to_string(i) + std::to_string(j));
-                matrix.at(1).at(4) = ('c' + std::to_string(i) + std::to_string(j));
-                matrix.at(8).at(5) = ('c' + std::to_string(i) + std::to_string(j));
-                matrix.at(8).at(3) = ('c' + std::to_string(i) + std::to_string(j));
-                matrix.at(8).at(4) = ('c' + std::to_string(i) + std::to_string(j));
-                matrix.at(7).at(4) = ('c' + std::to_string(i) + std::to_string(j));
-                matrix.at(4).at(8) = ('c' + std::to_string(i) + std::to_string(j));
-                matrix.at(4).at(7) = ('c' + std::to_string(i) + std::to_string(j));
-                matrix.at(3).at(8) = ('c' + std::to_string(i) + std::to_string(j));
-                matrix.at(5).at(8) = ('c' + std::to_string(i) + std::to_string(j));
-            }
-        }
+        matrix.at(4).at(1) = ('c' + std::to_string(4) + std::to_string(1));
+        matrix.at(4).at(0) = ('c' + std::to_string(4) + std::to_string(0));
+        matrix.at(5).at(0) = ('c' + std::to_string(5) + std::to_string(0));
+        matrix.at(3).at(0) = ('c' + std::to_string(3) + std::to_string(0));
+        matrix.at(0).at(4) = ('c' + std::to_string(0) + std::to_string(4));
+        matrix.at(0).at(5) = ('c' + std::to_string(0) + std::to_string(5));
+        matrix.at(0).at(3) = ('c' + std::to_string(0) + std::to_string(3));
+        matrix.at(1).at(4) = ('c' + std::to_string(1) + std::to_string(4));
+        matrix.at(8).at(5) = ('c' + std::to_string(8) + std::to_string(5));
+        matrix.at(8).at(3) = ('c' + std::to_string(8) + std::to_string(3));
+        matrix.at(8).at(4) = ('c' + std::to_string(8) + std::to_string(4));
+        matrix.at(7).at(4) = ('c' + std::to_string(7) + std::to_string(4));
+        matrix.at(4).at(8) = ('c' + std::to_string(4) + std::to_string(8));
+        matrix.at(4).at(7) = ('c' + std::to_string(4) + std::to_string(7));
+        matrix.at(3).at(8) = ('c' + std::to_string(3) + std::to_string(8));
+        matrix.at(5).at(8) = ('c' + std::to_string(5) + std::to_string(8));
     }
+    // Расстановка фишек игрока
     void position_player() {
-        for (int i = 2; i < 7; i++) {
-            for (int j = 2; j < 7; j++) {
-                matrix.at(4).at(5) = ('b' + std::to_string(i) + std::to_string(j));         //расстановка фишек игрока
-                matrix.at(4).at(6) = ('b' + std::to_string(i) + std::to_string(j));
-                matrix.at(4).at(3) = ('b' + std::to_string(i) + std::to_string(j));
-                matrix.at(4).at(2) = ('b' + std::to_string(i) + std::to_string(j));
-                matrix.at(3).at(4) = ('b' + std::to_string(i) + std::to_string(j));
-                matrix.at(2).at(4) = ('b' + std::to_string(i) + std::to_string(j));
-                matrix.at(5).at(4) = ('b' + std::to_string(i) + std::to_string(j));
-                matrix.at(6).at(4) = ('b' + std::to_string(i) + std::to_string(j));
-            }
-        }
+        matrix.at(4).at(5) = ('b' + std::to_string(4) + std::to_string(5));
+        matrix.at(4).at(6) = ('b' + std::to_string(4) + std::to_string(6));
+        matrix.at(4).at(3) = ('b' + std::to_string(4) + std::to_string(3));
+        matrix.at(4).at(2) = ('b' + std::to_string(4) + std::to_string(2));
+        matrix.at(3).at(4) = ('b' + std::to_string(3) + std::to_string(4));
+        matrix.at(2).at(4) = ('b' + std::to_string(2) + std::to_string(4));
+        matrix.at(5).at(4) = ('b' + std::to_string(5) + std::to_string(4));
+        matrix.at(6).at(4) = ('b' + std::to_string(6) + std::to_string(4));
     }
-
+    // Рсстановка короля
     void king1() {
-        for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 9; j++) {
-                matrix.at(4).at(4) = ('K' + std::to_string(i) + std::to_string(j));
-            }
-        }
+        matrix.at(4).at(4) = ('K' + std::to_string(4) + std::to_string(4));
     }
-
+    // Рсстановка выходов
     void exitplay() {
-        for (int i = 0; i < 9; i++) {
-            for (int j = 0; j < 9; j++) {
-                matrix.at(0).at(0) = ('X' + std::to_string(i) + std::to_string(j));
-                matrix.at(0).at(8) = ('X' + std::to_string(i) + std::to_string(j));         //расстановка выходов
-                matrix.at(8).at(0) = ('X' + std::to_string(i) + std::to_string(j));
-                matrix.at(8).at(8) = ('X' + std::to_string(i) + std::to_string(j));
-            }
-        }
+        matrix.at(0).at(0) = ('X' + std::to_string(0) + std::to_string(0));
+        matrix.at(0).at(8) = ('X' + std::to_string(0) + std::to_string(8));
+        matrix.at(8).at(0) = ('X' + std::to_string(8) + std::to_string(0));
+        matrix.at(8).at(8) = ('X' + std::to_string(8) + std::to_string(8));
     }
     // Отрисовка поля
     void print_matrix()
@@ -647,11 +632,6 @@ public:
             }
         }
 
-        // Обнуляем количество фишек и короля у игрока и компьютера
-        player_pieces = 0;
-        computer_pieces = 0;
-        king = 0;
-
         // Бесконечный цикл для ввода ходов от игрока
         while (true) {
             string coord1, coord2;
@@ -705,21 +685,6 @@ public:
 
             // Выполнение хода игрока
             make_a_move(&matrix, old_i, old_j, new_i, new_j);
-
-            // Обновление количества фишек и короля у игрока и компьютера
-            for (int m = 0; m < 9; m++) {
-                for (int n = 0; n < 9; n++) {
-                    if (matrix.at(m).at(n).at(0) == 'c') {
-                        computer_pieces++;
-                    }
-                    else if (matrix.at(m).at(n).at(0) == 'b') {
-                        player_pieces++;
-                    }
-                    else if (matrix.at(m).at(n).at(0) == 'K') {
-                        king++;
-                    };
-                }
-            }
 
             break; // Выход из цикла после успешного хода
         }
@@ -803,14 +768,38 @@ public:
                 evaluate_states();                                            // Оценивает возможные состояния игры и делает ход компьютер
             }
 
+            // Обнуляем количество фишек и короля у игрока и компьютера
+            player_pieces = 0;
+            computer_pieces = 0;
+            king = 0;
+            // Обновление количества фишек и короля у игрока и компьютера
+            for (int m = 0; m < 9; m++) {
+                for (int n = 0; n < 9; n++) {
+                    if (matrix.at(m).at(n).at(0) == 'c') {
+                        computer_pieces++;
+                    }
+                    else if (matrix.at(m).at(n).at(0) == 'b') {
+                        player_pieces++;
+                    }
+                    else if (matrix.at(m).at(n).at(0) == 'K') {
+                        king++;
+                    };
+                }
+            }
+
             if (king == 0 || player_pieces == 0) {                            // Если у игрока не осталось короля
                 print_matrix();
                 cout << ansi_red << "Вы проиграли!" << ansi_reset << endl;
                 return;
             }
-            else if (computer_pieces == 0) {                                  // Если у компьютера не осталось фишек (проверка на победу)
+            else if (computer_pieces == 0) {                                  // Если у компьютера не осталось фишек
                 print_matrix();
                 cout << ansi_green << "У компьютера не осталось фишек.\nВы выиграли!" << ansi_reset << endl;
+                return;
+            }
+            else if (matrix[0][0][0] == 'K' || matrix[0][8][0] == 'K' || matrix[8][0][0] == 'K' || matrix[8][8][0] == 'K') {
+                print_matrix();
+                cout << ansi_red << "Вы выиграли!" << ansi_reset << endl;
                 return;
             }
             player_turn = !player_turn; // Переключает ход между игроком и компьютером
