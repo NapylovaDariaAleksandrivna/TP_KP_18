@@ -1,1 +1,2 @@
-# checkers-minimax-alpha-beta
+# Курсовая работа на C++. Игра Оберег
+Правила: https://tavlei.net/
